@@ -12,8 +12,9 @@ export class CreateAppointmentDto {
     @Matches(/^([01]\d|2[0-3]):00$/, { message: "Must be o'clock hour"})
     time: string;
 
-    @ApiProperty({ name: 'reason', example: 'Tengo dolor de panza'})
+    @ApiProperty({ name: 'reason', example: 'Dolor de cabeza'})
     @IsString()
+    @Transform(({value}) => value ? value.toLowerCase() : value)
     reason: string;
 
     @ApiProperty({ name: 'userId', example: 3 })

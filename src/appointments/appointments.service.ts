@@ -8,13 +8,17 @@ import { DoctorsService } from 'src/doctors/doctors.service';
 import { UsersService } from 'src/users/users.service';
 import { AppointmentStatus } from 'src/common/enums/appointmentStatus.enum';
 import { getHoursInRange } from 'src/common/utils/functions.utils';
+import { Role } from 'src/common/enums/role.enum';
+import { FilterAppoinmentsQueryDto } from './dto/filter-query.dto';
+import { SpecialitiesService } from 'src/specialities/specialities.service';
 
 @Injectable()
 export class AppointmentsService {
   constructor(
     @InjectRepository(Appointment) private appointmentsRepository: Repository<Appointment>,
     private doctorsService: DoctorsService,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private specialtyService: SpecialitiesService
   ) { }
 
   async create(createAppointmentDto: CreateAppointmentDto) {
@@ -36,6 +40,9 @@ export class AppointmentsService {
     if (existingAppointment) throw new ConflictException('The appointment has been already taken');
 
     const user = await this.usersService.findOneById(createAppointmentDto.userId);
+
+    if(user.role != Role.PATIENT) throw new BadRequestException('The user is not a patient');
+
     const { speciality } = doctor;
 
     const newAppointment = this.appointmentsRepository.create({
@@ -48,8 +55,28 @@ export class AppointmentsService {
     return await this.appointmentsRepository.save(newAppointment);
   }
 
-  async findAll() {
-    return await this.appointmentsRepository.find();
+  async findAllOrFilter(queryDto: FilterAppoinmentsQueryDto) {
+    const query = this.appointmentsRepository.createQueryBuilder('appointment')
+    .leftJoinAndSelect('appointment.speciality', 'speciality');
+
+    const { reason, specialtyId, date } = queryDto;
+
+    if(date) {
+      query.andWhere('appointment.date = :date', {date})
+    }
+
+    if(specialtyId) {
+      const specialty = await this.specialtyService.findOne(specialtyId);
+      query.andWhere('appointment.speciality = :specialty', {specialty: specialty.id});
+    }
+
+    if(reason) {
+      query.andWhere('appointment.reason LIKE :keyword', { keyword: `%${reason}%`})
+    }
+
+
+
+    return await query.getMany();
   }
 
   async findOne(id: number) {
