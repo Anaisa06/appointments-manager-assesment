@@ -18,6 +18,11 @@ export class AppointmentsController {
     return this.appointmentsService.findAllOrFilter(query);
   }
 
+  @Get('patient/:id')
+  findByPatientId(@Param('id') id: string) {
+    return this.appointmentsService.findByPatientId(+id)
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.appointmentsService.findOne(+id);
@@ -28,8 +33,4 @@ export class AppointmentsController {
     return this.appointmentsService.update(+id, updateAppointmentDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.appointmentsService.remove(+id);
-  }
 }
