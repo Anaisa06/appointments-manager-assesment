@@ -4,8 +4,8 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 export const SwaggerConfig = (app: INestApplication) => {
     const versionApp = "1.0"
     const config = new DocumentBuilder()
-        .setTitle('test')
-        .setDescription(`test`)
+        .setTitle('Hospital Appointments Manager')
+        .setDescription(`This is an API to manage the appointments of a hospital`)
         .setVersion(versionApp)   
         .addServer('/api')   
         .addBearerAuth(

@@ -15,7 +15,7 @@ export class Doctor {
     @ManyToOne(() => Shift, (shift) => shift.doctors)
     shift: Shift
 
-    @OneToOne(() => User, (user) => user.doctor)
+    @ManyToOne(() => User)
     user: User;
 
     @ManyToOne(() => Speciality, (speciality) => speciality.doctors)

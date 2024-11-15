@@ -20,12 +20,10 @@ export class User {
     @Column({ name: 'phone_number'})
     phoneNumber: string;
 
-    @Column({ type: 'enum', enum: Role})
+    @Column({ type: 'enum', enum: Role, default: Role.PATIENT})
     role: Role;
 
     @OneToMany(() => Appointment, (appointment) => appointment.user)
     appointments: Appointment[];
 
-    @OneToOne(() => Doctor, (doctor) => doctor.user)
-    doctor: Doctor;
 }

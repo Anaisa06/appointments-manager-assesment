@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ShiftsService } from './shifts.service';
 import { CreateShiftDto } from './dto/create-shift.dto';
 import { UpdateShiftDto } from './dto/update-shift.dto';
+import { ShiftEnum } from 'src/common/enums/shifts.enum';
 
 @Controller('shifts')
 export class ShiftsController {
@@ -17,10 +18,10 @@ export class ShiftsController {
     return this.shiftsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.shiftsService.findOne(+id);
-  }
+  // @Get(':name')
+  // findOne(@Param('name') name: ShiftEnum) {
+  //   return this.shiftsService.findOneByName(name);
+  // }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateShiftDto: UpdateShiftDto) {

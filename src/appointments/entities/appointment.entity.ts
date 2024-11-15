@@ -15,7 +15,7 @@ export class Appointment {
     @Column()
     time: string;
 
-    @Column({ type: 'enum', enum: AppointmentStatus })
+    @Column({ type: 'enum', enum: AppointmentStatus, default: AppointmentStatus.PENDING })
     status: AppointmentStatus;
 
     @Column()

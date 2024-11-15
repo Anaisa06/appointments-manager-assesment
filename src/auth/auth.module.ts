@@ -23,6 +23,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
       }),
         PassportModule,],
       controllers: [AuthController],
-      providers: [AuthService, JwtAuthGuard, JwtStrategy]
+      providers: [AuthService, JwtAuthGuard, JwtStrategy],
+      exports: [TypeOrmModule, AuthService]
     })
 export class AuthModule { }
