@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Doctor } from './entities/doctor.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { ShiftsModule } from 'src/shifts/shifts.module';
-import { SpecialitiesService } from 'src/specialities/specialities.service';
 import { SpecialitiesModule } from 'src/specialities/specialities.module';
 import { Appointment } from 'src/appointments/entities/appointment.entity';
 

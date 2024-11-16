@@ -18,6 +18,8 @@ import { FilterAppoinmentsQueryDto } from './dto/filter-query.dto';
 import { SpecialitiesService } from 'src/specialities/specialities.service';
 import { Doctor } from 'src/doctors/entities/doctor.entity';
 import { Shift } from 'src/shifts/entities/shift.entity';
+import { isAfter, subHours } from 'date-fns';
+import { SocketService } from 'src/gateway/socket.service';
 
 @Injectable()
 export class AppointmentsService {
@@ -27,6 +29,7 @@ export class AppointmentsService {
     private doctorsService: DoctorsService,
     private usersService: UsersService,
     private specialtyService: SpecialitiesService,
+    private socketService: SocketService
   ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto) {
@@ -58,7 +61,10 @@ export class AppointmentsService {
       speciality,
     });
 
-    return await this.appointmentsRepository.save(newAppointment);
+    const savedAppointment = await this.appointmentsRepository.save(newAppointment);
+    this.socketService.handleAddAppointment()
+
+    return savedAppointment
   }
 
   async checkIfAppointmentIsTaken(date: Date, time: string, doctor: Doctor) {
@@ -98,6 +104,7 @@ export class AppointmentsService {
         specialty: specialty.id,
       });
     }
+    await this.getFutureAppointments();
 
     if (reason) {
       query.andWhere('appointment.reason LIKE :keyword', {
@@ -105,6 +112,15 @@ export class AppointmentsService {
       });
     }
     return await query.getMany();
+  }
+
+  async getFutureAppointments() {
+    const currentColombianDate = subHours(new Date(), 5);
+    const allAppointments = await this.appointmentsRepository.find();
+
+    const futureAppointments = allAppointments.filter(appointment => isAfter(appointment.date, currentColombianDate));
+
+    return futureAppointments;
   }
 
   async findByPatientId(id: number) {

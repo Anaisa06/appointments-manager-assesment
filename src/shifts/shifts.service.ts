@@ -4,7 +4,6 @@ import { UpdateShiftDto } from './dto/update-shift.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Shift } from './entities/shift.entity';
 import { Repository } from 'typeorm';
-import { NotFoundError } from 'rxjs';
 import { ShiftEnum } from 'src/common/enums/shifts.enum';
 
 @Injectable()

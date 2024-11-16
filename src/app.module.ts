@@ -9,6 +9,7 @@ import { DoctorsModule } from './doctors/doctors.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { SpecialitiesModule } from './specialities/specialities.module';
 import { ShiftsModule } from './shifts/shifts.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ShiftsModule } from './shifts/shifts.module';
     AppointmentsModule,
     SpecialitiesModule,
     ShiftsModule,
+    GatewayModule,
   ],
   controllers: [],
   providers: [],

@@ -1,5 +1,4 @@
-import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { CreateAppointmentDto } from './create-appointment.dto';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { AppointmentStatus } from 'src/common/enums/appointmentStatus.enum';

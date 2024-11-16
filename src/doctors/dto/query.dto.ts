@@ -1,6 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
-import { ShiftEnum } from 'src/common/enums/shifts.enum';
+import { IsOptional } from 'class-validator';
 
 export class DoctorQueryDto {
   @ApiPropertyOptional({ name: 'specialtyId', example: 1 })

@@ -10,7 +10,6 @@ import {
 import { ShiftsService } from './shifts.service';
 import { CreateShiftDto } from './dto/create-shift.dto';
 import { UpdateShiftDto } from './dto/update-shift.dto';
-import { ShiftEnum } from 'src/common/enums/shifts.enum';
 
 @Controller('shifts')
 export class ShiftsController {

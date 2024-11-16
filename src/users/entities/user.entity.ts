@@ -1,13 +1,6 @@
 import { Appointment } from 'src/appointments/entities/appointment.entity';
 import { Role } from 'src/common/enums/role.enum';
-import { Doctor } from 'src/doctors/entities/doctor.entity';
-import {
-  Column,
-  Entity,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
