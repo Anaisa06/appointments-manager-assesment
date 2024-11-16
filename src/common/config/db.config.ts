@@ -13,7 +13,7 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       port: this.configService.get<number>('DB_PORT'),
       username: this.configService.get<string>('DB_USER'),
       password: this.configService.get<string>('DB_PASSWORD'),
-      database: this.configService.get<string>('DB_NAME'),
+      database: this.configService.get<string>('DB_HOSPITAL_NAME'),
       autoLoadEntities: true,
       synchronize: true,
       logging: false,
