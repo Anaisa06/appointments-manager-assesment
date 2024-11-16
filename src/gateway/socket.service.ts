@@ -2,6 +2,7 @@ import { forwardRef, Inject, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { AppointmentsService } from 'src/appointments/appointments.service';
+import { Appointment } from 'src/appointments/entities/appointment.entity';
 
 @WebSocketGateway({
     namespace: 'appointments',
@@ -40,17 +41,24 @@ export class SocketService implements OnGatewayInit, OnGatewayConnection, OnGate
     ) {
 
         const appointments = await this.appointmentService.getFutureAppointments();
-        console.log(appointments);
 
         this.server.emit(
             'Appointments', appointments
         )
     }
 
-    @SubscribeMessage('futureAppointments')
-    async handleAddAppointment() {
-        const appointments = await this.appointmentService.getFutureAppointments();
-        console.log('holaaa'),
-        this.server.emit('Appointments', appointments)
+    async handleCancelledAppointments(cancelledAppointment: Appointment) {
+        this.server.emit(
+            'CancelledAppointments', 'Nueva cita cancelada', cancelledAppointment
+        )
+    }
+
+    async handleAddAppointment(newAppointment: Appointment) {
+
+        this.server.emit('NewAppointments', 'Nueva cita', newAppointment)
+    }
+
+    async handleUpdateAppointment(updatedAppointment: Appointment) {
+        this.server.emit('UpdatedAppointments', 'Cita modificada', updatedAppointment)
     }
 }

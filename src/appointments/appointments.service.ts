@@ -62,7 +62,7 @@ export class AppointmentsService {
     });
 
     const savedAppointment = await this.appointmentsRepository.save(newAppointment);
-    this.socketService.handleAddAppointment()
+    this.socketService.handleAddAppointment(savedAppointment);
 
     return savedAppointment
   }
@@ -147,7 +147,7 @@ export class AppointmentsService {
   async update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
     const appointment = await this.findOne(id);
     const doctor = await this.doctorsService.findOne(appointment.doctor.id);
-    const { time, date } = updateAppointmentDto;
+    const { time, date, status } = updateAppointmentDto;
 
     if (time) {
       this.verifyShiftHoursRange(doctor.shift, updateAppointmentDto.time);
@@ -162,6 +162,14 @@ export class AppointmentsService {
 
     await this.appointmentsRepository.update(id, updateAppointmentDto);
 
-    return await this.findOne(id);
+    const updatedAppointment =  await this.findOne(id);
+    
+    if(status && status === AppointmentStatus.CANCELLED) {
+      this.socketService.handleCancelledAppointments(updatedAppointment);
+    } else {
+      this.socketService.handleUpdateAppointment(updatedAppointment);
+    }
+
+    return updateAppointmentDto;
   }
 }
