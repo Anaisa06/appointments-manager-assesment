@@ -1,11 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsDate, IsNumber, IsString, Matches } from 'class-validator';
+import { IsDate, IsNumber, IsString, Matches, MinDate } from 'class-validator';
+
+const currentDate = new Date();
+currentDate.setDate(currentDate.getDate() - 1)
 
 export class CreateAppointmentDto {
   @ApiProperty({ name: 'date', example: '2024-12-06' })
   @Transform(({ value }) => (value ? new Date(value) : null))
   @IsDate()
+  @MinDate(currentDate, {message: 'The appointment must be in the future'})
   date: Date;
 
   @ApiProperty({ name: 'time', example: '12:00' })
