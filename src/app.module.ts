@@ -16,7 +16,7 @@ import { ShiftsModule } from './shifts/shifts.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      useClass: DatabaseConfig
+      useClass: DatabaseConfig,
     }),
     InterceptorsModule,
     UsersModule,
@@ -24,9 +24,9 @@ import { ShiftsModule } from './shifts/shifts.module';
     DoctorsModule,
     AppointmentsModule,
     SpecialitiesModule,
-    ShiftsModule
+    ShiftsModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

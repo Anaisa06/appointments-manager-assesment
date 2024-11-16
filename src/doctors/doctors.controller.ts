@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { DoctorsService } from './doctors.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
@@ -16,12 +25,12 @@ export class DoctorsController {
 
   @Get('availability')
   getAvailability(@Query() query: AvailabilityQueryDto) {
-    return this.doctorsService.getDoctorAvailability(query)
+    return this.doctorsService.getDoctorAvailability(query);
   }
 
   @Get('appointments')
   getAppointnets(@Query() query: AvailabilityQueryDto) {
-    return this.doctorsService.getDoctorAppointments(query)
+    return this.doctorsService.getDoctorAppointments(query);
   }
 
   @Get()
@@ -33,7 +42,6 @@ export class DoctorsController {
   findOne(@Param('id') id: string) {
     return this.doctorsService.findOne(+id);
   }
-
 
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateDoctorDto: UpdateDoctorDto) {

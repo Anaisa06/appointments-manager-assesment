@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSpecialityDto } from './dto/create-speciality.dto';
 import { UpdateSpecialityDto } from './dto/update-speciality.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,13 +12,15 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class SpecialitiesService {
   constructor(
-    @InjectRepository(Speciality) private specialityRepository: Repository<Speciality>
-  ){}
+    @InjectRepository(Speciality)
+    private specialityRepository: Repository<Speciality>,
+  ) {}
 
   async create(createSpecialityDto: CreateSpecialityDto) {
     const existingService = await this.findOneByName(createSpecialityDto.name);
 
-    if(existingService) throw new ConflictException('The speciality already exists');
+    if (existingService)
+      throw new ConflictException('The speciality already exists');
 
     const newSpeciality = this.specialityRepository.create(createSpecialityDto);
 
@@ -26,21 +32,23 @@ export class SpecialitiesService {
   }
 
   async findOne(id: number) {
-    const speciality = await this.specialityRepository.findOne({ where: {id}});
-    if(!speciality) throw new NotFoundException('Speciality was not found');
+    const speciality = await this.specialityRepository.findOne({
+      where: { id },
+    });
+    if (!speciality) throw new NotFoundException('Speciality was not found');
     return speciality;
   }
 
   async findOneByName(name: string) {
-    const service = await this.specialityRepository.findOne({ where: {name}});
+    const service = await this.specialityRepository.findOne({
+      where: { name },
+    });
     return service;
   }
 
-  update(id: number, updateSpecialityDto: UpdateSpecialityDto) {
-    return `This action updates a #${id} speciality`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} speciality`;
+  async remove(id: number) {
+    const { affected } = await this.specialityRepository.delete(id);
+    if (!affected) throw new NotFoundException('Specialty not found');
+    return `Specialty with id ${id} was deleted succesfuly`;
   }
 }

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,49 +22,56 @@ import { getHoursInRange } from 'src/common/utils/functions.utils';
 export class DoctorsService {
   constructor(
     @InjectRepository(Doctor) private doctorsRepository: Repository<Doctor>,
-    @InjectRepository(Appointment) private appointmentsRepository: Repository<Appointment>,
+    @InjectRepository(Appointment)
+    private appointmentsRepository: Repository<Appointment>,
     private authService: AuthService,
     private shiftsService: ShiftsService,
-    private specialtiesService: SpecialitiesService
-  ) { }
+    private specialtiesService: SpecialitiesService,
+  ) {}
 
   async create(createDoctorDto: CreateDoctorDto) {
     const user = await this.authService.register({
       ...createDoctorDto,
-      role: Role.DOCTOR
+      role: Role.DOCTOR,
     });
 
-    if (!user) throw new InternalServerErrorException('Error creating new user')
+    if (!user)
+      throw new InternalServerErrorException('Error creating new user');
 
     const shift = await this.shiftsService.findOneByName(createDoctorDto.shift);
-    const speciality = await this.specialtiesService.findOne(createDoctorDto.specialityId);
+    const speciality = await this.specialtiesService.findOne(
+      createDoctorDto.specialityId,
+    );
 
     const newDoctor = this.doctorsRepository.create({
       name: createDoctorDto.name,
       shift,
       speciality,
-      user
-    })
+      user,
+    });
 
     return await this.doctorsRepository.save(newDoctor);
   }
 
   async findAllOrFilter(queryDto: DoctorQueryDto) {
-    const query = this.doctorsRepository.createQueryBuilder('doctor')
+    const query = this.doctorsRepository
+      .createQueryBuilder('doctor')
       .leftJoinAndSelect('doctor.shift', 'shift')
-      .leftJoinAndSelect('doctor.speciality', 'speciality')
+      .leftJoinAndSelect('doctor.speciality', 'speciality');
 
     const { specialtyId, shiftId } = queryDto;
 
     if (specialtyId) {
       const specialty = await this.specialtiesService.findOne(specialtyId);
-      query.andWhere('doctor.speciality = :speciality', { speciality: specialty.id })
+      query.andWhere('doctor.speciality = :speciality', {
+        speciality: specialty.id,
+      });
     }
 
     if (shiftId) {
       const existingShift = await this.shiftsService.findOne(shiftId);
       console.log(existingShift);
-      query.andWhere('doctor.shift = :shift', { shift: existingShift.id })
+      query.andWhere('doctor.shift = :shift', { shift: existingShift.id });
     }
 
     return await query.getMany();
@@ -70,23 +82,31 @@ export class DoctorsService {
 
     const appointments = await this.getDoctorAppointments(queryDto);
 
-    const busyHours = appointments.map(appointment => appointment.time)
-    const hoursList = getHoursInRange(doctor.shift.startTime, doctor.shift.endTime);
-    const availableHours = hoursList.filter(hour => !busyHours.includes(hour));
+    const busyHours = appointments.map((appointment) => appointment.time);
+    const hoursList = getHoursInRange(
+      doctor.shift.startTime,
+      doctor.shift.endTime,
+    );
+    const availableHours = hoursList.filter(
+      (hour) => !busyHours.includes(hour),
+    );
 
     return availableHours;
-
   }
 
   async getDoctorAppointments(queryDto: AvailabilityQueryDto) {
     const doctor = await this.findOne(queryDto.doctorId);
-    const appointments = await this.appointmentsRepository.find({ where: { doctor, date: queryDto.date } })
+    const appointments = await this.appointmentsRepository.find({
+      where: { doctor, date: queryDto.date },
+    });
     return appointments;
-
   }
 
   async findOne(id: number) {
-    const doctor = await this.doctorsRepository.findOne({ where: { id }, relations: ['shift', 'speciality'] });
+    const doctor = await this.doctorsRepository.findOne({
+      where: { id },
+      relations: ['shift', 'speciality'],
+    });
     if (!doctor) throw new NotFoundException('Doctor was not found');
     return doctor;
   }

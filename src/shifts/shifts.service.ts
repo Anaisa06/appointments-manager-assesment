@@ -10,8 +10,8 @@ import { ShiftEnum } from 'src/common/enums/shifts.enum';
 @Injectable()
 export class ShiftsService {
   constructor(
-    @InjectRepository(Shift) private shiftsRepository: Repository<Shift>
-  ) { }
+    @InjectRepository(Shift) private shiftsRepository: Repository<Shift>,
+  ) {}
   async create(createShiftDto: CreateShiftDto) {
     const newShift = this.shiftsRepository.create(createShiftDto);
     return await this.shiftsRepository.save(newShift);
@@ -33,11 +33,15 @@ export class ShiftsService {
     return shift;
   }
 
-  update(id: number, updateShiftDto: UpdateShiftDto) {
-    return `This action updates a #${id} shift`;
+  async update(id: number, updateShiftDto: UpdateShiftDto) {
+    const { affected } = await this.shiftsRepository.update(id, updateShiftDto);
+    if (!affected) throw new NotFoundException('Shift was not found');
+    return await this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} shift`;
+  async remove(id: number) {
+    const { affected } = await this.shiftsRepository.delete(id);
+    if (!affected) throw new NotFoundException('Shift was not found');
+    return 'Shift deleted succesfully';
   }
 }

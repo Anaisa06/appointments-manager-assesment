@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,22 +22,32 @@ import { Shift } from 'src/shifts/entities/shift.entity';
 @Injectable()
 export class AppointmentsService {
   constructor(
-    @InjectRepository(Appointment) private appointmentsRepository: Repository<Appointment>,
+    @InjectRepository(Appointment)
+    private appointmentsRepository: Repository<Appointment>,
     private doctorsService: DoctorsService,
     private usersService: UsersService,
-    private specialtyService: SpecialitiesService
-  ) { }
+    private specialtyService: SpecialitiesService,
+  ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto) {
-    const doctor = await this.doctorsService.findOne(createAppointmentDto.doctorId);
+    const doctor = await this.doctorsService.findOne(
+      createAppointmentDto.doctorId,
+    );
 
     this.verifyShiftHoursRange(doctor.shift, createAppointmentDto.time);
 
-    await this.checkIfAppointmentIsTaken(createAppointmentDto.date, createAppointmentDto.time, doctor);
+    await this.checkIfAppointmentIsTaken(
+      createAppointmentDto.date,
+      createAppointmentDto.time,
+      doctor,
+    );
 
-    const user = await this.usersService.findOneById(createAppointmentDto.userId);
+    const user = await this.usersService.findOneById(
+      createAppointmentDto.userId,
+    );
 
-    if (user.role != Role.PATIENT) throw new BadRequestException('The user is not a patient');
+    if (user.role != Role.PATIENT)
+      throw new BadRequestException('The user is not a patient');
 
     const { speciality } = doctor;
 
@@ -40,8 +55,8 @@ export class AppointmentsService {
       ...createAppointmentDto,
       user,
       doctor,
-      speciality
-    })
+      speciality,
+    });
 
     return await this.appointmentsRepository.save(newAppointment);
   }
@@ -52,53 +67,64 @@ export class AppointmentsService {
         doctor,
         date,
         time,
-        status: Not(AppointmentStatus.CANCELLED)
-      }
+        status: Not(AppointmentStatus.CANCELLED),
+      },
     });
 
-    if (existingAppointment) throw new ConflictException('The appointment has been already taken');
-
+    if (existingAppointment)
+      throw new ConflictException('The appointment has been already taken');
   }
 
   verifyShiftHoursRange(shift: Shift, time: string) {
     const shiftHours = getHoursInRange(shift.startTime, shift.endTime);
-    if (!shiftHours.includes(time)) throw new BadRequestException('The time must be on Doctor\'s shift');
-
+    if (!shiftHours.includes(time))
+      throw new BadRequestException("The time must be on Doctor's shift");
   }
 
   async findAllOrFilter(queryDto: FilterAppoinmentsQueryDto) {
-    const query = this.appointmentsRepository.createQueryBuilder('appointment')
+    const query = this.appointmentsRepository
+      .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.speciality', 'speciality');
 
     const { reason, specialtyId, date } = queryDto;
 
     if (date) {
-      query.andWhere('appointment.date = :date', { date })
+      query.andWhere('appointment.date = :date', { date });
     }
 
     if (specialtyId) {
       const specialty = await this.specialtyService.findOne(specialtyId);
-      query.andWhere('appointment.speciality = :specialty', { specialty: specialty.id });
+      query.andWhere('appointment.speciality = :specialty', {
+        specialty: specialty.id,
+      });
     }
 
     if (reason) {
-      query.andWhere('appointment.reason LIKE :keyword', { keyword: `%${reason}%` })
+      query.andWhere('appointment.reason LIKE :keyword', {
+        keyword: `%${reason}%`,
+      });
     }
     return await query.getMany();
   }
 
   async findByPatientId(id: number) {
     const patient = await this.usersService.findOneById(id);
-    if (patient.role != Role.PATIENT) throw new BadRequestException('The user is not a patient');
+    if (patient.role != Role.PATIENT)
+      throw new BadRequestException('The user is not a patient');
 
-    const appointments = await this.appointmentsRepository.find({ where: { user: patient } });
+    const appointments = await this.appointmentsRepository.find({
+      where: { user: patient },
+    });
 
     return appointments;
   }
 
   async findOne(id: number) {
-    const appointment = await this.appointmentsRepository.findOne({ where: { id }, relations: ['doctor'] });
-    if(!appointment) throw new NotFoundException('Appointment was not found')
+    const appointment = await this.appointmentsRepository.findOne({
+      where: { id },
+      relations: ['doctor'],
+    });
+    if (!appointment) throw new NotFoundException('Appointment was not found');
     return appointment;
   }
 
@@ -108,15 +134,18 @@ export class AppointmentsService {
     const { time, date } = updateAppointmentDto;
 
     if (time) {
-      this.verifyShiftHoursRange(doctor.shift, updateAppointmentDto.time)
+      this.verifyShiftHoursRange(doctor.shift, updateAppointmentDto.time);
     }
     if (date) {
-      await this.checkIfAppointmentIsTaken(date, time ? time : appointment.time, doctor);
+      await this.checkIfAppointmentIsTaken(
+        date,
+        time ? time : appointment.time,
+        doctor,
+      );
     }
 
     await this.appointmentsRepository.update(id, updateAppointmentDto);
 
     return await this.findOne(id);
-
   }
 }
